@@ -3,7 +3,7 @@ Indago
 
 Bot using Selenium for performing actions like clicking and typing in a browser to end up with a condition that a page must match.
 
-How Does it Work?
+How It Should Work?
 ======
 
 Say for example that you want to know if their is a change in the timetable of your class. Instead of checking every evening you can now use this web application (which uses Selenium at the backend) to do this automatically for you.
