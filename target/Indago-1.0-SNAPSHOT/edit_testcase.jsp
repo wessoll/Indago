@@ -1,15 +1,24 @@
+<%-- 
+    Document   : edit_testcase
+    Created on : Jan 25, 2014, 10:23:13 PM
+    Author     : wesley
+--%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
     </head>
     <body>
-        <!-- Made in The Netherlands -->
+        <!-- Made in Europe -->
 
-        <form id="frmAddAction" action="addAction" method="post">
+        <form id="frmEditTestCase" action="editTestCase" method="post">
+            <input type="text" id="caseName" name="caseName" placeholder="Enter a Case name" value="${testCase.name}">
+            <input type="checkbox" id="true" name="isActive" ${testCase.isActive == true ? 'checked' : ''}> Active
+            
+            <input type="hidden" id="case_id" name="case_id" value="${testCase.case_id}">
             <input type="hidden" id="actions" name="actions" value="empty">
         </form>
         <table class="table" id="tblActions" border="1">
@@ -17,12 +26,14 @@
                 <td>
                     <select id="select0" onchange="addSubLevel(0)">
                         <option value="" disabled selected>Select your option</option>
-                        <option value="geturl">Get URL</option>
-                        <option value="click">Click</option>
-                        <option value="sendKeys">Send Keys</option>
-                        <option value="clear">Clear</option>
-                        <option value="matchText">Match Text</option>
+                        <option value="GET_URL">Get URL</option>
+                        <option value="CLICK">Click</option>
+                        <option value="SEND_KEYS">Send Keys</option>
+                        <option value="CLEAR">Clear</option>
+                        <option value="MATCH_TEXT">Match Text</option>
                     </select>
+                </td>
+                <td>
                 </td>
                 <td>
                 </td>
@@ -34,11 +45,11 @@
         </table>
 
         <button id="btnAddCriteria" onclick="addCriteria()">Add</button>
-        <button id="btnAddAction" onclick="addAction()">Add to Actions</button>
+        <button id="btnEditTestCase" onclick="editTestCase()">Save</button>
 
         <script>
 
-            function addAction()
+            function editTestCase()
             {
                 var table = document.getElementById("tblActions");
                 var rowCount = table.rows.length;
@@ -53,33 +64,37 @@
 
                     var action = new Object();
 
-                    if (selectedValue == "geturl")
+                    if (selectedValue == "GET_URL")
                     {
-                        action.action = "geturl";
-                        action.value = document.getElementById("urlValue" + i).value;
+                        action.action = "GET_URL";
+                        action.url = document.getElementById("urlValue" + i).value;
                     }
-                    if (selectedValue == "click")
+                    if (selectedValue == "CLICK")
                     {
-                        action.action = "click";
-                        action.id = document.getElementById("clickId" + i).value;
+                        action.action = "CLICK";
+                        action.elementType = document.getElementById("elementTypeId" + i).value;
+                        action.path = document.getElementById("clickId" + i).value;
                     }
-                    if (selectedValue == "sendKeys")
+                    if (selectedValue == "SEND_KEYS")
                     {
-                        action.action = "sendKeys";
-                        action.id = document.getElementById("sendKeysId" + i).value;
+                        action.action = "SEND_KEYS";
+                        action.elementType = document.getElementById("elementTypeId" + i).value;
+                        action.path = document.getElementById("sendKeysId" + i).value;
                         action.value = document.getElementById("sendKeysValue" + i).value;
                     }
-                    if (selectedValue == "clear")
+                    if (selectedValue == "CLEAR")
                     {
-                        action.action = "clear";
-                        action.id = document.getElementById("clearId" + i).value;
+                        action.action = "CLEAR";
+                        action.elementType = document.getElementById("elementTypeId" + i).value;
+                        action.path = document.getElementById("clearId" + i).value;
                     }
                     actions.push(action);
                 }
 
                 // send the actions to the server
+                alert(JSON.stringify(actions));
                 document.getElementById("actions").value = JSON.stringify(actions);
-                document.getElementById("frmAddAction").submit();
+                document.getElementById("frmEditTestCase").submit();
             }
 
             function addCriteria()
@@ -101,6 +116,14 @@
             function addSubLevel(id)
             {
                 var row = document.getElementById("tr" + id);
+                var selectElementTypes = "" +
+                    "<select id=\"elementTypeId" + id + "\">" + 
+                        "<option value=\"\" disabled selected>Select your option</option>" +
+                        "<option value=\"ID\">Id</option>" +
+                        "<option value=\"NAME\">Name</option>" +
+                        "<option value=\"LINK_TEXT\">LinkText</option>" + 
+                    "</select>";
+
 
                 // remove old data
                 for (var i = 1; i < 4; i++)
@@ -111,37 +134,46 @@
                 var selectedValue = document.getElementById("select" + id).value;
 
                 // value = geturl
-                if (selectedValue == "geturl") {
+                if (selectedValue == "GET_URL") {
                     var cell1 = row.cells[1];
                     cell1.innerHTML = "<input type=\"text\" id=\"urlValue" + id + "\" placeholder=\"url\">";
                 }
 
                 // value = click
-                if (selectedValue == "click") {
+                if (selectedValue == "CLICK") {
                     var cell1 = row.cells[1];
-                    cell1.innerHTML = "<input type=\"text\" id=\"clickId" + id + "\" placeholder=\"element id or name\">";
+                    cell1.innerHTML = selectElementTypes;
+                    
+                    var cell2 = row.cells[2];
+                    cell2.innerHTML = "<input type=\"text\" id=\"clickId" + id + "\" placeholder=\"path\">";
                 }
 
                 // value = sendKeys
-                if (selectedValue == "sendKeys") {
+                if (selectedValue == "SEND_KEYS") {
                     var cell1 = row.cells[1];
-                    cell1.innerHTML = "<input type=\"text\" id=\"sendKeysId" + id + "\" placeholder=\"element id or name\">";
-
+                    cell1.innerHTML = selectElementTypes;
+                    
                     var cell2 = row.cells[2];
-                    cell2.innerHTML = "<input type=\"text\" id=\"sendKeysValue" + id + "\" placeholder=\"text\">";
+                    cell2.innerHTML = "<input type=\"text\" id=\"sendKeysId" + id + "\" placeholder=\"path\">";
+
+                    var cell3 = row.cells[3];
+                    cell3.innerHTML = "<input type=\"text\" id=\"sendKeysValue" + id + "\" placeholder=\"text\">";
 
                 }
 
                 // value = clear
-                if (selectedValue == "clear") {
+                if (selectedValue == "CLEAR") {
                     var cell1 = row.cells[1];
-                    cell1.innerHTML = "<input type=\"text\" id=\"clearId" + id + "\" placeholder=\"element id or name\">";
+                    cell1.innerHTML = selectElementTypes;
+                    
+                    var cell2 = row.cells[2];
+                    cell2.innerHTML = "<input type=\"text\" id=\"clearId" + id + "\" placeholder=\"path\">";
                 }
 
                 // value = matchText
-                if (selectedValue == "matchText") {
+                if (selectedValue == "MATCH_TEXT") {
                     var cell1 = row.cells[1];
-                    cell1.innerHTML = "<input type=\"text\" id=\"matchTextId" + id + "\" placeholder=\"element id or name\">";
+                    cell1.innerHTML = "<input type=\"text\" id=\"matchTextId" + id + "\" placeholder=\"path\">";
 
                     var cell2 = row.cells[2];
                     cell2.innerHTML = "<input type=\"text\" id=\"matchTextValue" + id + "\" placeholder=\"text\">";
