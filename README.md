@@ -12,4 +12,9 @@ You provide some actions in the web interface. Like go to http://xxx.xx, click x
 
 This app distinguishes itself from other "bots" because you can actually provide actions to perform like clicking and sending keys (which allows you to login for example). Instead of only getting the page source and then verify if it matches something.
 
-It uses Tomcat on the server side and also uses Selenium.
+It uses Tomcat on the server side. Selenium is used to automate the actions in the browser. I first used MySQL for the database side, but then I thought, wouldn't it be nice if I use MongoDB (NoSQL) instead to strengthen my knowledge about it.
+
+Contribute
+======
+
+Please feel free to contribute to this project, contact me!
