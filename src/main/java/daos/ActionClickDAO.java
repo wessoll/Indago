@@ -22,7 +22,7 @@ public class ActionClickDAO extends MongoManager {
         BasicDBObject document = new BasicDBObject();
         
         document.put("action_id", new ObjectId(actionClick.getAction_id()));
-        document.put("elementType", actionClick.getElement().getElementType().getType());
+        document.put("elementType", actionClick.getElement().getElementType().toString());
         document.put("elementPath", actionClick.getElement().getPath());
         
         table.insert(document);

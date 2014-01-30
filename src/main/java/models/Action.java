@@ -7,21 +7,11 @@ package models;
 public class Action extends TestCase {
     
     public enum ActionTypes{
-        GET_URL("GET_URL"),
-        CLICK("CLICK"),
-        SEND_KEYS("SEND_KEYS"),
-        CLEAR("CLEAR"),
-        MATCH_TEXT("MATCH_TEXT");
-        
-        public String type;
-        
-        ActionTypes(String type){
-           this.type = type;
-        }
-        
-        public String getType(){
-            return type;
-        }
+        GET_URL,
+        CLICK,
+        SEND_KEYS,
+        CLEAR,
+        MATCH_TEXT
     }
     
     private String action_id;

@@ -7,19 +7,9 @@ package models;
 public class Element {
     
     public enum ElementTypes{
-        ID("ID"),
-        NAME("NAME"),
-        LINK_TEXT("LINK_TEXT");
-        
-        public String type;
-        
-        ElementTypes(String type){
-           this.type = type;
-        }
-        
-        public String getType(){
-            return type;
-        }
+        ID,
+        NAME,
+        LINK_TEXT
     }
     
     private ElementTypes elementType;

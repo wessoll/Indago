@@ -21,10 +21,9 @@ public class ActionDAO extends MongoManager {
         BasicDBObject document = new BasicDBObject();
         
         ObjectId id = new ObjectId();
-        System.out.println("AGAGIAGIAGIAIGAIGAIGAGIAGIAGIAG: " + id);
         document.put("_id", id);
         document.put("case_id", new ObjectId(action.getCase_id()));
-        document.put("actionType", action.getActionType().getType());
+        document.put("actionType", action.getActionType().toString());
         
         table.insert(document);
         

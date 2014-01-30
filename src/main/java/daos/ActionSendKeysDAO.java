@@ -24,7 +24,7 @@ public class ActionSendKeysDAO extends MongoManager {
         BasicDBObject document = new BasicDBObject();
         
         document.put("action_id", new ObjectId(actionSendKeys.getAction_id()));
-        document.put("elementType", actionSendKeys.getElement().getElementType().getType());
+        document.put("elementType", actionSendKeys.getElement().getElementType().toString());
         document.put("elementPath", actionSendKeys.getElement().getPath());
         document.put("value", actionSendKeys.getValue());
         

@@ -23,7 +23,7 @@ public class ActionClearDAO extends MongoManager {
         BasicDBObject document = new BasicDBObject();
         
         document.put("action_id", new ObjectId(actionClear.getAction_id()));
-        document.put("elementType", actionClear.getElement().getElementType().getType());
+        document.put("elementType", actionClear.getElement().getElementType().toString());
         document.put("elementPath", actionClear.getElement().getPath());
         
         table.insert(document);

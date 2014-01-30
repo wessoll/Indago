@@ -75,10 +75,69 @@ public class TestCaseController extends HttpServlet {
         if (requestAction.equals("loadTestCase")){
             String case_id = request.getParameter("case_id");
             
+            // load the testcase details
             TestCaseDAO testCaseDAO = new TestCaseDAO();
             TestCase testCase = testCaseDAO.findById(case_id).get(0);
             
-            request.setAttribute("testCase", testCase);
+            // load the actions that are linked to the testcase
+            ActionDAO actionDAO = new ActionDAO();
+            List<Action> actions = actionDAO.findByCaseId(testCase.getCase_id());
+
+            // action dao's
+            ActionGetURLDAO actionGetURLDAO = new ActionGetURLDAO();
+            ActionClickDAO actionClickDAO = new ActionClickDAO();
+            ActionSendKeysDAO actionSendKeysDAO = new ActionSendKeysDAO();
+            ActionClearDAO actionClearDAO = new ActionClearDAO();
+
+            JSONObject jsonAction = null; // this holds our action
+            JSONArray jsonArrayActions = new JSONArray(); // this holds all our actions
+            
+            // encode actions into json format
+            for (Action action : actions) {
+                switch (action.getActionType()) {
+                    case GET_URL:
+                        ActionGetURL actionGetURL = actionGetURLDAO.findByActionId(action.getAction_id()).get(0);
+                        
+                        // set json object
+                        jsonAction = new JSONObject();
+                        jsonAction.put("action", action.getActionType().toString());
+                        jsonAction.put("url", actionGetURL.getUrl());
+                        break;
+                    case CLICK:
+                        ActionClick actionClick = actionClickDAO.findByActionId(action.getAction_id()).get(0);
+                        
+                        // set json object
+                        jsonAction = new JSONObject();
+                        jsonAction.put("action", action.getActionType().toString());
+                        jsonAction.put("elementType", actionClick.getElement().getElementType().toString());
+                        jsonAction.put("path", actionClick.getElement().getPath());
+                        break;
+                    case SEND_KEYS:
+                        ActionSendKeys actionSendKeys = actionSendKeysDAO.findByActionId(action.getAction_id()).get(0);
+                        
+                        // set json object
+                        jsonAction = new JSONObject();
+                        jsonAction.put("action", action.getActionType().toString());
+                        jsonAction.put("elementType", actionSendKeys.getElement().getElementType().toString());
+                        jsonAction.put("path", actionSendKeys.getElement().getPath());
+                        jsonAction.put("value", actionSendKeys.getValue());
+                        break;
+                    case CLEAR:
+                        ActionClear actionClear = actionClearDAO.findByActionId(action.getAction_id()).get(0);
+                        
+                        // set json object
+                        jsonAction = new JSONObject();
+                        jsonAction.put("action", action.getActionType().toString());
+                        jsonAction.put("elementType", actionClear.getElement().getElementType().toString());
+                        jsonAction.put("path", actionClear.getElement().getPath());
+                        break;
+                }
+                // add the json action to the array of json actions
+                jsonArrayActions.add(jsonAction);
+            }
+            
+            request.setAttribute("testCase", testCase); // testcase details like name and isActive etc.
+            request.setAttribute("actions", jsonArrayActions); // actions in json format
             redirect(request, response, "/edit_testcase.jsp");
         }
         
@@ -116,7 +175,6 @@ public class TestCaseController extends HttpServlet {
                 for (Action action : actionsToDelete){
                     switch(action.getActionType()){
                     case GET_URL:
-                        System.out.println("gerurl " + action.getAction_id());
                         ActionGetURLDAO actionGetURLDAO = new ActionGetURLDAO();
                         actionGetURLDAO.deleteByActionId(action.getAction_id());
                         break;

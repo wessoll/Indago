@@ -48,6 +48,56 @@
         <button id="btnEditTestCase" onclick="editTestCase()">Save</button>
 
         <script>
+            var actions = eval(${actions}); // convert json data
+            for (var action in actions) {                
+                var actionType = actions[action]['action'];
+                
+                    if (actionType == "GET_URL")
+                    {
+                        // set action type
+                        var id = addCriteria();
+                        document.getElementById("select" + id).value = actionType;
+                        
+                        // set url
+                        addSubLevel(id);
+                        document.getElementById("urlValue" + id).value = actions[action]['url'];
+                    }
+                    if (actionType == "CLICK")
+                    {
+                        // set action type
+                        var id = addCriteria();
+                        document.getElementById("select" + id).value = actionType;
+                        
+                        // set elementType and path
+                        addSubLevel(id);
+                        document.getElementById("elementTypeId" + id).value = actions[action]['elementType'];
+                        document.getElementById("clickId" + id).value = actions[action]['path'];
+                    }
+                    if (actionType == "SEND_KEYS")
+                    {
+                        // set action type
+                        var id = addCriteria();
+                        document.getElementById("select" + id).value = actionType;
+                        
+                        // set elementType and path
+                        addSubLevel(id);
+                        document.getElementById("elementTypeId" + id).value = actions[action]['elementType'];
+                        document.getElementById("sendKeysId" + id).value = actions[action]['path'];
+                        document.getElementById("sendKeysValue" + id).value = actions[action]['value'];
+                    }
+                    if (actionType == "CLEAR")
+                    {
+                        // set action type
+                        var id = addCriteria();
+                        document.getElementById("select" + id).value = actionType;
+                        
+                        // set elementType and path
+                        addSubLevel(id);
+                        document.getElementById("elementTypeId" + id).value = actions[action]['elementType'];
+                        document.getElementById("clearId" + id).value = actions[action]['path'];
+                    }
+            }
+            
 
             function editTestCase()
             {
@@ -100,17 +150,19 @@
             function addCriteria()
             {
                 var table = document.getElementById("tblActions");
-                var rowCount = table.rows.length;
-                var row = table.insertRow(rowCount);
+                var id = table.rows.length;
+                var row = table.insertRow(id);
                 row.innerHTML = table.rows[0].innerHTML; // 0 is placeholder
-                row.id = "tr" + rowCount;
+                row.id = "tr" + id;
 
                 // make the row visible
                 row.style.display = "block";
 
                 // change id's of the select and addSubLevel parameter
-                row.innerHTML = row.innerHTML.replace("select0", "select" + rowCount);
-                row.innerHTML = row.innerHTML.replace("addSubLevel(0", "addSubLevel(" + rowCount);
+                row.innerHTML = row.innerHTML.replace("select0", "select" + id);
+                row.innerHTML = row.innerHTML.replace("addSubLevel(0", "addSubLevel(" + id);
+                
+                return id;
             }
 
             function addSubLevel(id)
