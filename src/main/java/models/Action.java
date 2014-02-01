@@ -11,7 +11,7 @@ public class Action extends TestCase {
         CLICK,
         SEND_KEYS,
         CLEAR,
-        MATCH_TEXT
+        CONTAINS_TEXT
     }
     
     private String action_id;

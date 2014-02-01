@@ -2,12 +2,13 @@ package controllers;
 
 import daos.ActionClearDAO;
 import daos.ActionClickDAO;
+import daos.ActionContainsTextDAO;
 import daos.ActionDAO;
 import daos.ActionGetURLDAO;
 import daos.ActionSendKeysDAO;
 import daos.TestCaseDAO;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import models.Action;
 import models.ActionClear;
 import models.ActionClick;
+import models.ActionContainsText;
 import models.ActionGetURL;
 import models.ActionSendKeys;
 import models.TestCase;
@@ -48,11 +50,7 @@ public class TestCaseController extends HttpServlet {
         
         // list test cases
         if (action.equals("listTestCases")){
-            TestCaseDAO testCaseDAO = new TestCaseDAO();
-            List<TestCase> testCases = testCaseDAO.findAll();
-            
-            request.setAttribute("testCases", testCases);
-            redirect(request, response, "testcases.jsp");
+            setTestCasesOnRequest(request, response);
         }
     }
 
@@ -88,6 +86,7 @@ public class TestCaseController extends HttpServlet {
             ActionClickDAO actionClickDAO = new ActionClickDAO();
             ActionSendKeysDAO actionSendKeysDAO = new ActionSendKeysDAO();
             ActionClearDAO actionClearDAO = new ActionClearDAO();
+            ActionContainsTextDAO actionContainsTextDAO = new ActionContainsTextDAO();
 
             JSONObject jsonAction = null; // this holds our action
             JSONArray jsonArrayActions = new JSONArray(); // this holds all our actions
@@ -131,6 +130,15 @@ public class TestCaseController extends HttpServlet {
                         jsonAction.put("elementType", actionClear.getElement().getElementType().toString());
                         jsonAction.put("path", actionClear.getElement().getPath());
                         break;
+                    case CONTAINS_TEXT:
+                        ActionContainsText actionContainsText = actionContainsTextDAO.findByActionId(action.getAction_id()).get(0);
+                        
+                        // set json object
+                        jsonAction = new JSONObject();
+                        jsonAction.put("action", action.getActionType().toString());
+                        jsonAction.put("value", actionContainsText.getValue());
+                        jsonAction.put("assert", actionContainsText.isAssertEquals());
+                        break;
                 }
                 // add the json action to the array of json actions
                 jsonArrayActions.add(jsonAction);
@@ -151,6 +159,7 @@ public class TestCaseController extends HttpServlet {
             boolean isUpdate = (case_id == "") ? false : true;
             String caseName = request.getParameter("caseName");
             boolean isActive = (request.getParameter("isActive") == null) ? false : true;
+            TestCase.Timeframes timeframe = TestCase.Timeframes.valueOf(request.getParameter("selectTimeframe"));
             
             TestCase testCase = null;
             TestCaseDAO testCaseDAO = testCaseDAO = new TestCaseDAO();
@@ -162,6 +171,7 @@ public class TestCaseController extends HttpServlet {
                 
                 testCase.setName(caseName);
                 testCase.setIsActive(isActive);
+                testCase.setTimeframe(timeframe);
                 
                 testCaseDAO.update(testCase);
                 
@@ -190,6 +200,10 @@ public class TestCaseController extends HttpServlet {
                         ActionClearDAO actionClearDAO = new ActionClearDAO();
                         actionClearDAO.deleteByActionId(action.getAction_id());
                         break;
+                    case CONTAINS_TEXT:
+                        ActionContainsTextDAO actionContainsTextDAO = new ActionContainsTextDAO();
+                        actionContainsTextDAO.deleteByActionId(action.getAction_id());
+                        break;
                     }
                     // delete "parent" action
                     actionDAO.deleteByCaseId(case_id);
@@ -203,7 +217,8 @@ public class TestCaseController extends HttpServlet {
                 testCase.setName(caseName);
                 testCase.setIsActive(isActive);
                 testCase.setStatus("N/A");
-                testCase.setLastTested(null);
+                testCase.setLastTested(new Date(0)); // this tells us to test it immediately as soon as it becomes active
+                testCase.setTimeframe(timeframe);
                 
                 case_id = testCaseDAO.insert(testCase);
             }
@@ -267,10 +282,19 @@ public class TestCaseController extends HttpServlet {
                         ActionClearDAO actionClearDAO = new ActionClearDAO();
                         actionClearDAO.insert(actionClear);
                         break;
-                    default:
-                        System.err.println("Action not implemented (yet)");
+                    case CONTAINS_TEXT:
+                        System.out.println("FDSJKFLDS: " + subactions.get("assert"));
+                        ActionContainsText actionContainsText = new ActionContainsText(action.getActionType(),
+                                subactions.get("value").toString(),
+                                (subactions.get("assert").equals("true"))?true:false);
+                        actionContainsText.setAction_id(action.getAction_id());
+
+                        ActionContainsTextDAO actionContainsTextDAO = new ActionContainsTextDAO();
+                        actionContainsTextDAO.insert(actionContainsText);
+                        break;
                 }
             }
+            setTestCasesOnRequest(request, response);
         }
     }
     /**
@@ -285,5 +309,14 @@ public class TestCaseController extends HttpServlet {
             throws ServletException, IOException {
         RequestDispatcher dispatcher = request.getRequestDispatcher(address);
         dispatcher.forward(request, response);
+    }
+    
+    private void setTestCasesOnRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException{
+        TestCaseDAO testCaseDAO = new TestCaseDAO();
+        List<TestCase> testCases = testCaseDAO.findAll();
+            
+        request.setAttribute("testCases", testCases);
+        redirect(request, response, "testcases.jsp");
     }
 }

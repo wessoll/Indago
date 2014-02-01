@@ -1,6 +1,6 @@
 package models;
 
-import java.sql.Date;
+import java.util.Date;
 
 /**
  *
@@ -8,20 +8,38 @@ import java.sql.Date;
  */
 public class TestCase {
     
+    public enum Timeframes{
+        EVERY_HOUR(60000),
+        EVERY_12_HOURS(720000),
+        EVERY_24_HOURS(1440000);
+        
+        private long milliseconds;
+        
+        Timeframes(long milliseconds){
+            this.milliseconds = milliseconds;
+        }
+        
+        public long getMilliseconds(){
+            return milliseconds;
+        }
+    }
+    
     private String case_id;
     private String name;
     private boolean isActive, assertEquals;
     private String status;
     private Date lastTested;
+    private Timeframes timeframe;
     
     public TestCase(){
         
     }
     
-    public TestCase(String case_id, String name, boolean isActive){
+    public TestCase(String case_id, String name, boolean isActive, Timeframes timeframe){
         this.case_id = case_id;
         this.name = name;
         this.isActive = isActive;
+        this.timeframe = timeframe;
     }
 
     public String getCase_id() {
@@ -77,7 +95,7 @@ public class TestCase {
     }
 
     /**
-     * Date on when Selenium performed the last test
+     * Date on which Selenium performed the last test
      * @return 
      */
     public Date getLastTested() {
@@ -86,5 +104,17 @@ public class TestCase {
 
     public void setLastTested(Date lastTested) {
         this.lastTested = lastTested;
+    }
+
+    /**
+     * Timeframe in which the scheduler needs to be active
+     * @return 
+     */
+    public Timeframes getTimeframe() {
+        return timeframe;
+    }
+
+    public void setTimeframe(Timeframes timeframe) {
+        this.timeframe = timeframe;
     }
 }

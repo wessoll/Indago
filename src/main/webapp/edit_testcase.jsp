@@ -17,6 +17,13 @@
         <form id="frmEditTestCase" action="editTestCase" method="post">
             <input type="text" id="caseName" name="caseName" placeholder="Enter a Case name" value="${testCase.name}">
             <input type="checkbox" id="true" name="isActive" ${testCase.isActive == true ? 'checked' : ''}> Active
+            <select id="selectTimeframe" name="selectTimeframe">
+                <option value="" disabled selected>Select your option</option>
+                <option value="EVERY_HOUR" ${(testCase.timeframe == 'EVERY_HOUR') ? 'selected' : ''}>Every hour</option>
+                <option value="EVERY_12_HOURS" ${(testCase.timeframe == 'EVERY_12_HOURS') ? 'selected' : ''}>Every 12 hours</option>
+                <option value="EVERY_24_HOURS" ${(testCase.timeframe == 'EVERY_24_HOURS') ? 'selected' : ''}>Every day</option>
+            </select>
+            
             
             <input type="hidden" id="case_id" name="case_id" value="${testCase.case_id}">
             <input type="hidden" id="actions" name="actions" value="empty">
@@ -30,7 +37,7 @@
                         <option value="CLICK">Click</option>
                         <option value="SEND_KEYS">Send Keys</option>
                         <option value="CLEAR">Clear</option>
-                        <option value="MATCH_TEXT">Match Text</option>
+                        <option value="CONTAINS_TEXT">Contains Text</option>
                     </select>
                 </td>
                 <td>
@@ -48,6 +55,7 @@
         <button id="btnEditTestCase" onclick="editTestCase()">Save</button>
 
         <script>
+            
             var actions = eval(${actions}); // convert json data
             for (var action in actions) {                
                 var actionType = actions[action]['action'];
@@ -79,7 +87,7 @@
                         var id = addCriteria();
                         document.getElementById("select" + id).value = actionType;
                         
-                        // set elementType and path
+                        // set elementType and path, and value
                         addSubLevel(id);
                         document.getElementById("elementTypeId" + id).value = actions[action]['elementType'];
                         document.getElementById("sendKeysId" + id).value = actions[action]['path'];
@@ -95,6 +103,17 @@
                         addSubLevel(id);
                         document.getElementById("elementTypeId" + id).value = actions[action]['elementType'];
                         document.getElementById("clearId" + id).value = actions[action]['path'];
+                    }
+                    if (actionType == "CONTAINS_TEXT")
+                    {
+                        // set action type
+                        var id = addCriteria();
+                        document.getElementById("select" + id).value = actionType;
+                        
+                        // set value
+                        addSubLevel(id);
+                        document.getElementById("containsTextId" + id).value = actions[action]['value'];
+                        document.getElementById("containsTextAssert" + id).value = actions[action]['assert'];
                     }
             }
             
@@ -137,6 +156,12 @@
                         action.action = "CLEAR";
                         action.elementType = document.getElementById("elementTypeId" + i).value;
                         action.path = document.getElementById("clearId" + i).value;
+                    }
+                    if (selectedValue == "CONTAINS_TEXT")
+                    {
+                        action.action = "CONTAINS_TEXT";
+                        action.value = document.getElementById("containsTextId" + i).value;
+                        action.assert = document.getElementById("containsTextAssert" + i).value;
                     }
                     actions.push(action);
                 }
@@ -222,16 +247,13 @@
                     cell2.innerHTML = "<input type=\"text\" id=\"clearId" + id + "\" placeholder=\"path\">";
                 }
 
-                // value = matchText
-                if (selectedValue == "MATCH_TEXT") {
+                // value = containsText
+                if (selectedValue == "CONTAINS_TEXT") {
                     var cell1 = row.cells[1];
-                    cell1.innerHTML = "<input type=\"text\" id=\"matchTextId" + id + "\" placeholder=\"path\">";
+                    cell1.innerHTML = "<input type=\"text\" id=\"containsTextId" + id + "\" placeholder=\"value\">";
 
                     var cell2 = row.cells[2];
-                    cell2.innerHTML = "<input type=\"text\" id=\"matchTextValue" + id + "\" placeholder=\"text\">";
-
-                    var cell3 = row.cells[3];
-                    cell3.innerHTML = "<select><option>Equals</option><option>Does not Equals</option></select>";
+                    cell2.innerHTML = "<select id=\"containsTextAssert" + id + "\"><option value=\"true\">Equals</option><option value=\"false\">Does not Equals</option></select>";
                 }
             }
         </script>
