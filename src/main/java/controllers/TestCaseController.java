@@ -6,8 +6,10 @@ import daos.ActionContainsTextDAO;
 import daos.ActionDAO;
 import daos.ActionGetURLDAO;
 import daos.ActionSendKeysDAO;
+import daos.SchedulerDAO;
 import daos.TestCaseDAO;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.RequestDispatcher;
@@ -23,6 +25,7 @@ import models.ActionGetURL;
 import models.ActionSendKeys;
 import models.TestCase;
 import models.Element;
+import models.User;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -50,7 +53,9 @@ public class TestCaseController extends HttpServlet {
         
         // list test cases
         if (action.equals("listTestCases")){
-            setTestCasesOnRequest(request, response);
+            setTestCasesOnRequest(request);
+            setMetaDataOnRequest(request);
+            redirect(request, response, "testcases.jsp");
         }
     }
 
@@ -155,6 +160,9 @@ public class TestCaseController extends HttpServlet {
         
         else if (requestAction.equals("editTestCase")){
             
+            boolean isUpdated = false;
+            boolean isCreated = false;
+            
             String case_id = request.getParameter("case_id");
             boolean isUpdate = (case_id == "") ? false : true;
             String caseName = request.getParameter("caseName");
@@ -219,6 +227,9 @@ public class TestCaseController extends HttpServlet {
                 testCase.setStatus("N/A");
                 testCase.setLastTested(new Date(0)); // this tells us to test it immediately as soon as it becomes active
                 testCase.setTimeframe(timeframe);
+                // get the user from the session and set it as the owner
+                User loggedInUser = (User)request.getSession().getAttribute("loggedInUser");
+                testCase.setOwner(loggedInUser);
                 
                 case_id = testCaseDAO.insert(testCase);
             }
@@ -294,7 +305,17 @@ public class TestCaseController extends HttpServlet {
                         break;
                 }
             }
-            setTestCasesOnRequest(request, response);
+            if (isUpdate){
+                isUpdated = true;
+            }
+            else{
+                isCreated = true;
+            }
+            request.setAttribute("isUpdated", isUpdated);
+            request.setAttribute("isCreated", isCreated);
+            setTestCasesOnRequest(request);
+            setMetaDataOnRequest(request);
+            redirect(request, response, "testcases.jsp");
         }
     }
     /**
@@ -311,12 +332,31 @@ public class TestCaseController extends HttpServlet {
         dispatcher.forward(request, response);
     }
     
-    private void setTestCasesOnRequest(HttpServletRequest request, HttpServletResponse response)
+    private void setTestCasesOnRequest(HttpServletRequest request)
             throws ServletException, IOException{
         TestCaseDAO testCaseDAO = new TestCaseDAO();
         List<TestCase> testCases = testCaseDAO.findAll();
+        
+        // filter testcases on the user that is logged in
+        User loggedInUser = (User)request.getSession().getAttribute("loggedInUser");
+        
+        for (int i=0;i<testCases.size();i++){
+            if (!testCases.get(i).getOwner().getUserId().equals(loggedInUser.getUserId())){
+                testCases.remove(testCases.get(i));
+            }
+        }
             
         request.setAttribute("testCases", testCases);
-        redirect(request, response, "testcases.jsp");
+    }
+    
+    /**
+     * Data like the schedulers last heart beat
+     * @param request 
+     */
+    private void setMetaDataOnRequest(HttpServletRequest request){
+        SchedulerDAO schedulerDAO = new SchedulerDAO();
+        models.Scheduler scheduler = schedulerDAO.find();
+        
+        request.setAttribute("scheduler", scheduler);
     }
 }

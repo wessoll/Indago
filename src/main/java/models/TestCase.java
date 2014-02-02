@@ -30,16 +30,18 @@ public class TestCase {
     private String status;
     private Date lastTested;
     private Timeframes timeframe;
+    private User owner;
     
     public TestCase(){
         
     }
     
-    public TestCase(String case_id, String name, boolean isActive, Timeframes timeframe){
+    public TestCase(String case_id, String name, boolean isActive, Timeframes timeframe, User owner){
         this.case_id = case_id;
         this.name = name;
         this.isActive = isActive;
         this.timeframe = timeframe;
+        this.owner = owner;
     }
 
     public String getCase_id() {
@@ -117,4 +119,18 @@ public class TestCase {
     public void setTimeframe(Timeframes timeframe) {
         this.timeframe = timeframe;
     }
+
+    /**
+     * The User that created the TestCase
+     * @return 
+     */
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+    
+    
 }

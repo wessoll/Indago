@@ -7,7 +7,9 @@ import daos.ActionContainsTextDAO;
 import daos.ActionDAO;
 import daos.ActionGetURLDAO;
 import daos.ActionSendKeysDAO;
+import daos.SchedulerDAO;
 import daos.TestCaseDAO;
+import daos.UserDAO;
 import java.util.Date;
 import java.util.List;
 import models.Action;
@@ -18,6 +20,7 @@ import models.ActionGetURL;
 import models.ActionSendKeys;
 import models.Element;
 import models.TestCase;
+import models.User;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -36,6 +39,18 @@ public class TestCaseExecuter implements Job{
 
     @Override
     public void execute(JobExecutionContext jec) throws JobExecutionException {
+        
+        // update the status of the scheduler
+        SchedulerDAO schedulerDAO = new SchedulerDAO();
+        models.Scheduler scheduler = schedulerDAO.find();
+        
+        if (scheduler == null){ // create new scheduler object
+            schedulerDAO.insert(new models.Scheduler(new Date()));
+        }
+        else{ // update
+            scheduler.setLastHeartbeat(new Date());
+            schedulerDAO.update(scheduler);
+        }
 
         /**
          * Check for every testcase that is active
@@ -51,17 +66,24 @@ public class TestCaseExecuter implements Job{
             long timeDifference = now.getTime()-lastTested.getTime();
             
             // remove testcase from list if the timeframe is not reached yet
-            if (timeDifference < timeframe){
+            if (timeDifference > timeframe){
                 testCases.remove(testCases.get(i));
             }
+            else{
+                // get and set all the details of the owner for the testcase (we only have userId)
+                UserDAO userDAO = new UserDAO();
+                String userId = testCases.get(i).getOwner().getUserId();
+                User user = userDAO.findByUserId(userId);
+                
+                testCases.get(i).setOwner(user);
+            }
         }
-        
         
         for (TestCase testCase : testCases) {
             System.out.println("[started testcase, name: " + testCase.getName() + "]");
             // Get the actions related to the testcase
             ActionDAO actionDAO = new ActionDAO();
-            List<Action> actions = actionDAO.findAll();
+            List<Action> actions = actionDAO.findByCaseId(testCase.getCase_id());
 
             boolean assertEquals = true; // becomes false when we encounter an error
             String status = "Case succeeded";
@@ -214,9 +236,9 @@ public class TestCaseExecuter implements Job{
                 testCase.setIsActive(false);
                 
                 // notify the owner of the testcase that it was meet
-                Mail mail = new Mail();
+                Mail mail = new Mail(testCase.getOwner());
                 mail.sendMail("Indago | " + testCase.getName(), "" 
-                        + "Dear, "
+                        + "Dear " + testCase.getOwner().getFirstname() + ","
                         + "\n\nThis message was sent to inform you that the following case met the conditions: "
                         + "\n\n"
                         + "TestCase: " + testCase.getName()

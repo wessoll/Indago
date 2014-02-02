@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import models.TestCase;
+import models.User;
 import org.bson.types.ObjectId;
 
 public class TestCaseDAO extends MongoManager {
@@ -29,6 +30,7 @@ public class TestCaseDAO extends MongoManager {
         document.put("status", testCase.getStatus());
         document.put("lastTested", testCase.getLastTested());
         document.put("timeframe", testCase.getTimeframe().toString());
+        document.put("user_id", new ObjectId(testCase.getOwner().getUserId()));
         
         table.insert(document);
         
@@ -47,6 +49,7 @@ public class TestCaseDAO extends MongoManager {
         newDocument.put("status", testCase.getStatus());
         newDocument.put("lastTested", testCase.getLastTested());
         newDocument.put("timeframe", testCase.getTimeframe().toString());
+        newDocument.put("user_id", new ObjectId(testCase.getOwner().getUserId()));
  
 	BasicDBObject updateObj = new BasicDBObject();
 	updateObj.put("$set", newDocument);
@@ -70,6 +73,7 @@ public class TestCaseDAO extends MongoManager {
             testCase.setStatus(dbObject.get("status").toString());
             testCase.setLastTested((Date)dbObject.get("lastTested"));
             testCase.setTimeframe(TestCase.Timeframes.valueOf(dbObject.get("timeframe").toString()));
+            testCase.setOwner(new User(dbObject.get("user_id").toString()));
             testCases.add(testCase);
 	}
         return testCases;
@@ -93,6 +97,7 @@ public class TestCaseDAO extends MongoManager {
             testCase.setStatus(dbObject.get("status").toString());
             testCase.setLastTested((Date)dbObject.get("lastTested"));
             testCase.setTimeframe(TestCase.Timeframes.valueOf(dbObject.get("timeframe").toString()));
+            testCase.setOwner(new User(dbObject.get("user_id").toString()));
             testCases.add(testCase);
 	}
         return testCases;
@@ -116,6 +121,7 @@ public class TestCaseDAO extends MongoManager {
             testCase.setStatus(dbObject.get("status").toString());
             testCase.setLastTested((Date)dbObject.get("lastTested"));
             testCase.setTimeframe(TestCase.Timeframes.valueOf(dbObject.get("timeframe").toString()));
+            testCase.setOwner(new User(dbObject.get("user_id").toString()));
             testCases.add(testCase);
 	}
         return testCases;

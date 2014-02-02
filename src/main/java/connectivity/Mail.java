@@ -10,6 +10,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import models.User;
 
 /**
  *
@@ -19,17 +20,19 @@ import javax.mail.internet.MimeMessage;
  */
 public class Mail {
     
-    private final String TO = "";
     private final String FROM = "";
     private final String HOST = "";
     private final String PORT = "";
     private final String USERNAME = "";
     private final String PASSWORD = "";
+    private User user;
     
     private Properties properties;
     private Session session;
     
-    public Mail(){
+    public Mail(User user){
+        this.user = user;
+        
         properties = System.getProperties();
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.host", HOST);
@@ -48,7 +51,7 @@ public class Mail {
             MimeMessage message = new MimeMessage(session);
             
             message.setFrom(new InternetAddress(FROM));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(TO));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmailAddress()));
             message.setSubject(subject);
             message.setText(body); // body of the mail message
             
