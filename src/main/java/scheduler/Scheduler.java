@@ -33,7 +33,7 @@ public class Scheduler {
             Trigger trigger = newTrigger()
                     .startNow()
                 .withIdentity("trigger1", "group1")
-                .withSchedule(cronSchedule("0 0/10 * * * ?")) // every hour
+                .withSchedule(cronSchedule("0 0/1 * * * ?")) // every hour
                 .forJob("job1", "group1")
                 .build();
 

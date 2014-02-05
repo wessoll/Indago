@@ -20,11 +20,11 @@ import models.User;
  */
 public class Mail {
     
-    private final String FROM = "";
-    private final String HOST = "";
-    private final String PORT = "";
-    private final String USERNAME = "";
-    private final String PASSWORD = "";
+    private final String FROM = "FROM";
+    private final String HOST = "HOST";
+    private final String PORT = "PORT";
+    private final String USERNAME = "USERNAME";
+    private final String PASSWORD = "PASSWORD";
     private User user;
     
     private Properties properties;

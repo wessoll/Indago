@@ -9,9 +9,9 @@ import java.util.Date;
 public class TestCase {
     
     public enum Timeframes{
-        EVERY_HOUR(60000),
-        EVERY_12_HOURS(720000),
-        EVERY_24_HOURS(1440000);
+        EVERY_HOUR(3600000),
+        EVERY_12_HOURS(43200000),
+        EVERY_24_HOURS(86400000);
         
         private long milliseconds;
         
